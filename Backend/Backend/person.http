@@ -12,3 +12,16 @@ Content-Type: application/json
 ###
 GET http://localhost:3000/api/people
 Accept: application/json
+
+###
+PUT {{base_address}}/30
+Content-Type: application/json
+
+{
+  "Id" : 30,
+  "FirstName" : "Suraj",
+  "LastName" : "Doe"
+}
+
+###
+DELETE {{base_address}}/30
