@@ -1,7 +1,18 @@
 import PersonForm from "./PersonForm"
 import PersonList from "./PersonList"
+import { useForm } from "react-hook-form"
 
 function Person() {
+    const defaultFormValues = {
+        id: 0,
+        firstName: 'Suraj',
+        lastName: 'Dabhole'
+    };
+
+    const methods = useForm({
+        defaultValues: defaultFormValues,
+    });
+
     const people = [
       { id: 1, firstName: "Alice", lastName: "Johnson" },
       { id: 2, firstName: "Bob", lastName: "Smith" },
@@ -10,6 +21,14 @@ function Person() {
       { id: 5, firstName: "Ethan", lastName: "Brown" }
     ];
 
+    const handleFormReset = () => {
+        methods.reset(defaultFormValues);
+    }
+    
+    const handleFormSubmit = (data) => {
+        console.log(data);
+    }
+    
     const handlePersonEdit = (person) => {
         console.log("Edit person:", person);
     }
@@ -31,7 +50,7 @@ function Person() {
 
                 </div>                                            
 
-                <PersonForm />
+                <PersonForm methods={methods} onFormReset={handleFormReset} onFormSubmit={handleFormSubmit}/>
                 <PersonList peopleList={people} onPersonEdit={handlePersonEdit} onPersonDelete={handlePersonDelete}/>
             </div>            
         </div>
