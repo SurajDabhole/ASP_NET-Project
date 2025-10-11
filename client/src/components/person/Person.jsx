@@ -1,8 +1,39 @@
+import { useEffect, useState } from "react";
 import PersonForm from "./PersonForm"
 import PersonList from "./PersonList"
-import { useForm } from "react-hook-form"
+import { set, useForm } from "react-hook-form"
+import toast from 'react-hot-toast';
+import axios from "axios";
 
 function Person() {
+    const BASE_URL = import.meta.env.VITE_BASE_API_URL + "/people";
+    
+    const [people,setPeople] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [editData, setEditData] = useState(null);
+
+    useEffect(() => {
+        try{
+            const loadPeople = async () => {
+                var peopleData = (await axios.get(BASE_URL)).data;
+                setPeople(peopleData);
+                loadPeople();
+            }
+        }
+        catch(error){
+        
+        }
+        finally{    
+            setLoading(false);
+        }
+    });
+
+    useEffect(() => {
+        if(editData) {
+            methods.reset(editData);
+        }   
+    }, [editData]);
+
     const defaultFormValues = {
         id: 0,
         firstName: 'Suraj',
@@ -13,31 +44,51 @@ function Person() {
         defaultValues: defaultFormValues,
     });
 
-    const people = [
-      { id: 1, firstName: "Alice", lastName: "Johnson" },
-      { id: 2, firstName: "Bob", lastName: "Smith" },
-      { id: 3, firstName: "Charlie", lastName: "Lee" },
-      { id: 4, firstName: "Diana", lastName: "Patel" },
-      { id: 5, firstName: "Ethan", lastName: "Brown" }
-    ];
-
     const handleFormReset = () => {
         methods.reset(defaultFormValues);
     }
     
-    const handleFormSubmit = (data) => {
-        console.log(data);
+    const handleFormSubmit = async (person) => {
+        setLoading(true);
+        try {
+            if(person.id <= 0) {
+                const createdPerson = (await axios.post(BASE_URL, person)).data;
+                setPeople((previousPerson) => [...previousPerson, createdPerson]);
+            }
+            else{
+                await axios.put(`${BASE_URL}/${person.id}`, person);
+                setPeople((previousPerson) => previousPerson.map(p => p.id === person.id ? person : p));
+            }
+            methods.reset(defaultFormValues);
+            toast.success('Person saved successfully!');
+        } catch (error) {
+            console.log(error);
+            toast.error('An error occurred while saving the person.');
+        }
+        finally {
+            setLoading(false);
+        }
     }
     
     const handlePersonEdit = (person) => {
-        console.log("Edit person:", person);
+        setEditData(person);
     }
 
-    const handlePersonDelete = (person) => {
+    const handlePersonDelete = async(person) => {
         if(! confirm(`Are you sure you want to delete ${person.firstName} ${person.lastName}?`)) {
             return;
         }
-        console.log("Delete person:", person);
+        setLoading(true);
+        try {
+            await axios.delete(`${BASE_URL}/${person.id}`);
+            setPeople((previousPerson) => previousPerson.filter(p => p.id !== person.id));
+            toast.success('Person deleted successfully!');
+        } catch (error) {
+            toast.error('An error occurred while deleting the person.');
+        }
+        finally{    
+            setLoading(false);
+        }
     }
 
     return (
@@ -47,7 +98,7 @@ function Person() {
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                         Person Management
                     </h1>
-
+                    {loading && <p>Loading...</p>}
                 </div>                                            
 
                 <PersonForm methods={methods} onFormReset={handleFormReset} onFormSubmit={handleFormSubmit}/>

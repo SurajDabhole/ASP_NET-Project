@@ -4,6 +4,7 @@ import About from "./pages/About"
 import NotFound from "./pages/NotFound"
 import Person from "./components/person/Person"
 import { Routes, Route } from "react-router";
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
   return (
@@ -15,7 +16,7 @@ const App = () => {
         <Route path="person" element={<Person />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-
+      <Toaster />
    </>
   )
 }
